@@ -3,12 +3,21 @@ const mongoose = require('mongoose');
 const app = express();
 const port = process.env.PORT || 3000;
 
-
 app.use(express.urlencoded({ extended: true }));
 
 
-app.get('/login/', (req, res) => {
+app.use((req, res, next) => {
     res.type('text/plain');
+    next();
+});
+
+
+app.get('/', (req, res) => {
+    res.send('OK');
+});
+
+
+app.get('/login/', (req, res) => {
     res.send('l1zavetkns');
 });
 
@@ -17,7 +26,7 @@ app.post('/insert/', async (req, res) => {
     const { login, password, URL } = req.body;
 
     if (!login || !password || !URL) {
-        return res.status(400).send('Не переданы login, password или URL');
+        return res.status(400).send('Missing fields');
     }
 
     try {
@@ -37,11 +46,11 @@ app.post('/insert/', async (req, res) => {
 
         await mongoose.disconnect();
 
-        res.send('Документ записан');
+        res.send('Document inserted');
     } catch (error) {
-        console.error('Ошибка:', error.message);
+        console.error(error.message);
         try { await mongoose.disconnect(); } catch (e) {}
-        res.status(500).send('Ошибка записи в базу данных');
+        res.status(500).send('Database error');
     }
 });
 
