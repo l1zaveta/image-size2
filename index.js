@@ -1,9 +1,15 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const multer = require('multer');
+const sharp = require('sharp');
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.urlencoded({ extended: true }));
+
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 
 app.use((req, res, next) => {
@@ -19,6 +25,19 @@ app.get('/', (req, res) => {
 
 app.get('/login/', (req, res) => {
     res.send('l1zavetkns');
+});
+
+
+app.post('/size2json/', upload.single('image'), async (req, res) => {
+    if (!req.file) {
+        return res.json({ width: 0, height: 0 });
+    }
+    try {
+        const metadata = await sharp(req.file.buffer).metadata();
+        return res.json({ width: metadata.width || 0, height: metadata.height || 0 });
+    } catch (error) {
+        return res.json({ width: 0, height: 0 });
+    }
 });
 
 
